@@ -19,6 +19,7 @@ class GUI(QDialog):
         path_to_file = f'{self.dropbox_dir.toPlainText()}/{filename}'
         save_path = f'{self.local_savepoint.toPlainText()}/{filename}'
 
+        # TODO: Do not download if file is alreadu in directory
         # TODO: Catch more kinds of errors
         try:
             metadata, file = dbx.files_download(path_to_file)
