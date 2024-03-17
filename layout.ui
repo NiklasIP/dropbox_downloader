@@ -160,6 +160,22 @@
     </rect>
    </property>
   </widget>
+  <widget class="QPushButton" name="abort_button">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>590</y>
+     <width>80</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Abort</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

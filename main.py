@@ -1,12 +1,10 @@
-import os
+from os import listdir
 from stone.backends.python_rsrc.stone_validators import ValidationError
-import sys
 
 import dropbox
 from dropbox.exceptions import ApiError
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
-
 
 
 class GUI(QDialog):
@@ -17,6 +15,8 @@ class GUI(QDialog):
 
         self.download_button.clicked.connect(self.download)
         self.quit_button.clicked.connect(self.quit)
+        self.abort_button.clicked.connect(self.quit)
+
 
     def download_file(self, filename: str, dbx: dropbox.Dropbox) -> None:
         '''Downloads a given file from the specified Dropbox directory'''
@@ -29,7 +29,7 @@ class GUI(QDialog):
         save_path = f'{savepoint}/{filename}'
 
         # Do not download if file by the same name is already in directory
-        files_in_dir = os.listdir(savepoint)
+        files_in_dir = listdir(savepoint)
         if filename in files_in_dir:
             print(f"File {filename} already in directory. Skipping")
 
@@ -59,12 +59,13 @@ class GUI(QDialog):
             try:
                 self.download_file(file, dbx)
             except FileNotFoundError:
-                '''If the directory to save to '''
+                '''If the directory to save to does not exist'''
                 message = QMessageBox()
                 message.setText(f"Save directory does not exist for file: {file}")
                 message.exec_()
                 return None
             except ValidationError:
+                '''If the Dropbox directory requested does note exist'''
                 message = QMessageBox()
                 message.setText(f"Dropbox directory does not exist for file: {file}")
                 message.exec_()
@@ -81,8 +82,8 @@ class GUI(QDialog):
         else:
             return True
 
-    def quit(self):
-        sys.exit()
+    def quit(self) -> None:
+        self.close()
 
 
 def main():
