@@ -1,9 +1,13 @@
+import os
+from stone.backends.python_rsrc.stone_validators import ValidationError
 import sys
 
 import dropbox
 from dropbox.exceptions import ApiError
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
+
+
 
 class GUI(QDialog):
     def __init__(self):
@@ -16,11 +20,20 @@ class GUI(QDialog):
 
     def download_file(self, filename: str, dbx: dropbox.Dropbox) -> None:
         '''Downloads a given file from the specified Dropbox directory'''
-        path_to_file = f'{self.dropbox_dir.toPlainText()}/{filename}'
-        save_path = f'{self.local_savepoint.toPlainText()}/{filename}'
 
-        # TODO: Do not download if file is already in directory
-        # TODO: Catch more kinds of errors
+        savepoint = "."
+        if self.local_savepoint.toPlainText() != '':
+            savepoint = self.local_savepoint.toPlainText()
+
+        path_to_file = f'{self.dropbox_dir.toPlainText()}/{filename}'
+        save_path = f'{savepoint}/{filename}'
+
+        # Do not download if file by the same name is already in directory
+        files_in_dir = os.listdir(savepoint)
+        if filename in files_in_dir:
+            print(f"File {filename} already in directory. Skipping")
+
+        # Try to download
         try:
             metadata, file = dbx.files_download(path_to_file)
             with open(save_path, 'wb') as a:
@@ -32,27 +45,38 @@ class GUI(QDialog):
         '''Checks if all the fields are filled out. If so, all the listed files are downloaded'''
         if not self.valid_input():
             message = QMessageBox()
-            message.setText("Only the Dropbox directory may be left empty.")
+            message.setText("You must enter at least one file to download.")
             message.exec_()
             return None
-
-        # TODO: Check if save directory exists
 
         #Get the list of files and turn to a list based on breakrows
         to_download = self.file_list.toPlainText().split('\n')
 
         #Connect to Dropbox and download files
         dbx = dropbox.Dropbox(self.token.toPlainText())
+
         for file in to_download:
-            self.download_file(file, dbx)
+            try:
+                self.download_file(file, dbx)
+            except FileNotFoundError:
+                '''If the directory to save to '''
+                message = QMessageBox()
+                message.setText(f"Save directory does not exist for file: {file}")
+                message.exec_()
+                return None
+            except ValidationError:
+                message = QMessageBox()
+                message.setText(f"Dropbox directory does not exist for file: {file}")
+                message.exec_()
+                return None
+            else:
+                print(f"{file} downloaded successfully.")
+
+
 
     def valid_input(self) -> bool:
-        '''Check if all the text fields have been filled out'''
+        '''Check if the download list has at least one entry'''
         if self.file_list.toPlainText() == '':
-            return False
-        elif self.token.toPlainText() == '':
-            return False
-        elif self.local_savepoint.toPlainText() == '':
             return False
         else:
             return True

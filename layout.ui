@@ -101,7 +101,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Enter the directory in which the files you wish to download are stored</string>
+    <string>Enter the directory in which the files you wish to download are stored. Leave blank if top layer</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -114,7 +114,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Enter the directory to which you wish to save the files</string>
+    <string>Enter the directory to which you wish to save the files. Leave blank to store in active directory.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_5">
