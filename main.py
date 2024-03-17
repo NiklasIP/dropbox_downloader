@@ -1,6 +1,5 @@
 import dropbox
-
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QDialog, QMessageBox, QApplication
 from PyQt5 import uic
 from PyQt5.QtCore import QThread
 from Thread import Worker
@@ -15,9 +14,10 @@ class GUI(QDialog):
         self.download_button.clicked.connect(self.download)
         self.quit_button.clicked.connect(self.quit)
         self.abort_button.clicked.connect(self.quit)
+        # TODO: Implement the functionality for the progressbar and abort button
 
     def download(self) -> None:
-        '''Checks if all the fields are filled out. If so, all the listed files are downloaded'''
+        """Checks if all the fields are filled out. If so, all the listed files are downloaded"""
         if not self.valid_input():
             message = QMessageBox()
             message.setText("You must enter at least one file to download.")
@@ -35,7 +35,13 @@ class GUI(QDialog):
         path_to_file = f'{self.dropbox_dir.toPlainText()}'
 
         # Connect to Dropbox and download files
-        dbx = dropbox.Dropbox(self.token.toPlainText())
+        try:
+            dbx = dropbox.Dropbox(self.token.toPlainText())
+        except dropbox.dropbox_client.BadInputException:
+            message = QMessageBox()
+            message.setText("The provided access token is valid")
+            message.exec_()
+            return None
 
         self.thread = QThread()
         self.worker = Worker(dbx, to_download, savepoint, path_to_file)
@@ -45,17 +51,19 @@ class GUI(QDialog):
         self.thread.quit()
 
     def valid_input(self) -> bool:
-        '''Check if the download list has at least one entry'''
+        """Check if the download list has at least one entry"""
         if self.file_list.toPlainText() == '':
             return False
         else:
             return True
 
     def quit(self) -> None:
+        """Close the GUI"""
         self.close()
 
 
 def main():
+    """Launch GUI"""
     app = QApplication([])
     window = GUI()
     app.exec_()

@@ -18,7 +18,8 @@ class Worker(QObject):
         self.savepoint = savepoint
         self.loadpoint = loadpoint
 
-    def run(self):
+    def run(self) -> None:
+        """Commences the download by passing each individual file in the provided list to the download_file function"""
         for file in self.to_download:
             try:
                 self.download_file(file)
@@ -34,7 +35,7 @@ class Worker(QObject):
                 message.exec_()
 
     def download_file(self, filename: str) -> None:
-        '''Downloads a given file from the specified Dropbox directory'''
+        """Downloads a given file from the specified Dropbox directory"""
 
         # Do not download if file by the same name is already in directory
         files_in_dir = listdir(self.savepoint)
@@ -42,14 +43,16 @@ class Worker(QObject):
             print(f"File {filename} already in directory. Skipping")
             return None
 
+        # Where is the file located on Dropbox
         file_to_load = f'{self.loadpoint}/{filename}'
+        # Where is the file to be saved locally
         file_to_save = f'{self.savepoint}/{filename}'
 
         # Try to download
         try:
             metadata, file = self.dbx.files_download(file_to_load)
-            with open(file_to_save, 'wb') as a:
-                a.write(file.content)
+            with open(file_to_save, 'wb') as local_file:
+                local_file.write(file.content)
             print(f"{filename} downloaded successfully.")
         except ApiError as e:
             print(f"File '{filename}' not found. Skipping.")
