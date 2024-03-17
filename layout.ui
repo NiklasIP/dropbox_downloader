@@ -114,7 +114,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Enter the directory to which you wish to save the files. Leave blank to store in active directory.</string>
+    <string>Enter the directory to which you wish to save the files.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_5">
