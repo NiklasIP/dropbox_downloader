@@ -1,6 +1,6 @@
 import dropbox
 
-from PyQt5.QtWidgets import QDialog, QMessageBox, QApplication
+from PyQt5.QtWidgets import QDialog, QMessageBox, QApplication, QFileDialog
 from PyQt5 import uic
 from PyQt5.QtCore import QThread, pyqtSignal
 from Thread import Worker
@@ -15,6 +15,7 @@ class GUI(QDialog):
         self.download_button.clicked.connect(self.download)
         self.quit_button.clicked.connect(self.quit)
         self.abort_button.clicked.connect(self.quit)
+        self.folder_button.clicked.connect(self.set_download_folder)
         self.progress_value = 0
 
     def download(self) -> None:
@@ -53,6 +54,14 @@ class GUI(QDialog):
         # Start and stop thread properly
         self.thread.start()
         self.thread.quit()
+
+    def set_download_folder(self) -> None:
+        """ Gets the download folder from a dialog box and updates the download path in the GUI"""
+        # open the QFileDialog to select the download folder
+        download_folder = QFileDialog.getExistingDirectory()
+        # update local_savepoint box with the download folder
+        self.local_savepoint.insertPlainText(download_folder)
+
 
     def set_progress_val(self, val) -> None:
         """ Set the value of the progress bar to indicate percentage of files downloaded. """
