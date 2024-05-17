@@ -11,6 +11,7 @@ class Worker(QObject):
 
     # Signal reporting number of files downloaded/handled
     report_progress = pyqtSignal(int)
+    files_not_downloaded = pyqtSignal(list)
 
     def __init__(self, dbx_object: dropbox.Dropbox,
                  to_download: list,
@@ -21,6 +22,7 @@ class Worker(QObject):
         self.to_download = to_download
         self.savepoint = savepoint
         self.loadpoint = loadpoint
+        self.failed_dowloads = []
 
         self.progress = 0
 
@@ -42,6 +44,7 @@ class Worker(QObject):
             finally:
                 self.progress += 1
                 self.report_progress.emit(self.progress)
+        self.files_not_downloaded.emit(self.failed_dowloads)
 
     def download_file(self, filename: str) -> None:
         """Downloads a given file from the specified Dropbox directory"""
@@ -52,7 +55,7 @@ class Worker(QObject):
             print(f"File {filename} already in directory. Skipping")
             return None
 
-        file_to_load = f'{self.loadpoint}/{filename}'
+        file_to_load = f'/{self.loadpoint}/{filename}'
         file_to_save = f'{self.savepoint}/{filename}'
 
         # Try to download
@@ -63,3 +66,4 @@ class Worker(QObject):
             print(f"{filename} downloaded successfully.")
         except ApiError:
             print(f"File '{filename}' not found. Skipping.")
+            self.failed_dowloads.append(filename)
