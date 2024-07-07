@@ -1,10 +1,11 @@
+from time import strftime
+
 import dropbox
 
-from PyQt5.QtWidgets import QDialog, QMessageBox, QApplication, QFileDialog
+from PyQt5.QtWidgets import QDialog, QMessageBox, QApplication, QFileDialog, QButtonGroup
 from PyQt5 import uic
 from PyQt5.QtCore import QThread, pyqtSignal
 from Thread import Worker
-
 
 class GUI(QDialog):
     def __init__(self):
@@ -17,7 +18,18 @@ class GUI(QDialog):
         self.abort_button.clicked.connect(self.quit)
         self.folder_button.clicked.connect(self.set_download_folder)
         self.clear_files_button.clicked.connect(self.clear_files)
+
+        self.button_group = QButtonGroup()
+        self.button_group.addButton(self.goholm_button)
+        self.button_group.addButton(self.ottenby_button)
+        self.button_group.addButton(self.other_button)
+
+        self.goholm_button.toggled.connect(self.set_locale)
+        self.ottenby_button.toggled.connect(self.set_locale)
+        self.other_button.toggled.connect(self.set_locale)
+
         self.progress_value = 0
+        self.locale = ''
 
     def download(self) -> None:
         """Checks if all the fields are filled out. If so, all the listed files are downloaded"""
@@ -35,7 +47,12 @@ class GUI(QDialog):
         if self.local_savepoint.toPlainText() != '':
             savepoint = self.local_savepoint.toPlainText()
 
-        path_to_file = f'{self.dropbox_dir.toPlainText()}'
+
+        # TODO: get a correct directory path in dropbox
+        if self.locale == "Other":
+            path_to_file = f'{self.other_locale.toPlainText()}/{self.selected_year}'
+        else:
+            path_to_file = f'{self.locale}/{self.selected_year}'
 
         # Set progress bar max to reflect download progress
         self.progress_bar.setMaximum(len(self.to_download))
@@ -94,6 +111,15 @@ class GUI(QDialog):
     def clear_files(self) -> None:
         self.file_list.setPlainText('')
 
+    def set_locale(self)-> None:
+        radioBtn = self.sender()
+        if radioBtn.isChecked():
+            self.locale = radioBtn.text()
+
+            if self.locale == "Other":
+                self.other_locale.setEnabled(True)
+            else:
+                self.other_locale.setEnabled(False)
     def quit(self) -> None:
         self.close()
 
