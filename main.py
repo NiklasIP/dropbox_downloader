@@ -1,4 +1,4 @@
-from time import strftime
+from datetime import datetime
 
 import dropbox
 
@@ -28,6 +28,7 @@ class GUI(QDialog):
         self.ottenby_button.toggled.connect(self.set_locale)
         self.other_button.toggled.connect(self.set_locale)
 
+        self.selected_year.setPlainText(datetime.now().strftime("%Y")) # Set current year as default
         self.progress_value = 0
         self.locale = ''
 
@@ -48,11 +49,11 @@ class GUI(QDialog):
             savepoint = self.local_savepoint.toPlainText()
 
 
-        # TODO: get a correct directory path in dropbox
+        # Construct the correct directory path in dropbox
         if self.locale == "Other":
-            path_to_file = f'{self.other_locale.toPlainText()}/{self.selected_year}'
+            path_to_file = f'{self.other_locale.toPlainText()}'
         else:
-            path_to_file = f'{self.locale}/{self.selected_year}'
+            path_to_file = f'{self.locale}/{self.selected_year.toPlainText()}'
 
         # Set progress bar max to reflect download progress
         self.progress_bar.setMaximum(len(self.to_download))
@@ -68,6 +69,10 @@ class GUI(QDialog):
 
         # Connect signal for progress bar
         self.worker.report_progress.connect(self.set_progress_val)
+
+        # Connect signal for errors
+        self.worker.thread_error.connect(self.display_error_message)
+
         # Connect to signal to get list of failed downloads
         self.worker.files_not_downloaded.connect(self.get_failed_downloads)
 
@@ -100,6 +105,18 @@ class GUI(QDialog):
             message = f"Failed to download the following files:\n {chr(10).join(str(x) for x in failed_downloads)}"
             message_box.setText(message)
             message_box.exec_()
+    def display_error_message(self, error_code) -> None:
+        error_messages = {1: "Save directory does not exist.",
+                          2: "Dropbox directory does not exist.",
+                          3: "The authentication token you are using has expired.",
+                          4: "The authentication token you have entered is malformed",
+                          5: """You have encountered an unknown error. That is quite impressive.
+                          Please submit a detailed description of what you did to get here."""}
+
+        message = QMessageBox()
+        message.setText(error_messages[error_code])
+        message.exec_()
+
 
     def valid_input(self) -> bool:
         """Check if the download list has at least one entry"""
