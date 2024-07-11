@@ -81,8 +81,6 @@ class GUI(QDialog):
         self.thread.quit()
 
 
-
-
     def set_download_folder(self) -> None:
         """ Gets the download folder from a dialog box and updates the download path in the GUI"""
         # open the QFileDialog to select the download folder
@@ -105,7 +103,10 @@ class GUI(QDialog):
             message = f"Failed to download the following files:\n {chr(10).join(str(x) for x in failed_downloads)}"
             message_box.setText(message)
             message_box.exec_()
+
+
     def display_error_message(self, error_code) -> None:
+        """Collection of error messages to be displayed. Determined by signal from thread"""
         error_messages = {1: "Save directory does not exist.",
                           2: "Dropbox directory does not exist.",
                           3: "The authentication token you are using has expired.",
@@ -125,19 +126,26 @@ class GUI(QDialog):
         else:
             return True
 
+
     def clear_files(self) -> None:
+        """Clear list of files to be downloaded"""
         self.file_list.setPlainText('')
 
+
     def set_locale(self)-> None:
-        radioBtn = self.sender()
-        if radioBtn.isChecked():
-            self.locale = radioBtn.text()
+        """Set a variable to mark which locale recordings to be used """
+        radio_button = self.sender()
+        if radio_button.isChecked():
+            self.locale = radio_button.text()
 
             if self.locale == "Other":
                 self.other_locale.setEnabled(True)
             else:
                 self.other_locale.setEnabled(False)
+
+
     def quit(self) -> None:
+        """Close the program"""
         self.close()
 
 
@@ -145,7 +153,6 @@ def main():
     app = QApplication([])
     window = GUI()
     app.exec_()
-
 
 if __name__ == "__main__":
     main()
